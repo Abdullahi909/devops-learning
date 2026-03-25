@@ -1,0 +1,1052 @@
+{
+  "name": "Barber Shop Automation - All-in-One",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "barber-webhook",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [240, 300],
+      "webhookId": "barber-incoming"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Extract and clean incoming message data\nconst from = $input.item.json.From || '';\nconst body = $input.item.json.Body || '';\nconst messageSid = $input.item.json.MessageSid || '';\n\n// Clean phone number (remove + and whitespace)\nconst phone = from.replace(/[^0-9]/g, '');\n\n// Lowercase message for easier processing\nconst message = body.trim().toLowerCase();\n\nreturn {\n  phone: phone,\n  message: message,\n  original_message: body,\n  message_sid: messageSid,\n  timestamp: new Date().toISOString()\n};"
+      },
+      "id": "extract-data",
+      "name": "Extract Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "table": "customers",
+        "filterType": "manual",
+        "matchingColumns": "phone",
+        "phone": "={{ $json.phone }}",
+        "options": {}
+      },
+      "id": "get-customer",
+      "name": "Get Customer",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [680, 300],
+      "credentials": {
+        "supabaseApi": {
+          "id": "1",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": ""
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.length }}",
+              "rightValue": "0",
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "customer-exists",
+      "name": "Customer Exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "customers",
+        "dataMode": "autoMapInputData",
+        "columnsUi": {
+          "columnValues": [
+            {
+              "column": "phone",
+              "value": "={{ $('Extract Data').item.json.phone }}"
+            },
+            {
+              "column": "first_contact",
+              "value": "={{ $now }}"
+            },
+            {
+              "column": "total_messages",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "create-customer",
+      "name": "Create Customer",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1120, 420],
+      "credentials": {
+        "supabaseApi": {
+          "id": "1",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "customer_data",
+              "name": "customer",
+              "value": "={{ $json[0] || $('Create Customer').item.json }}",
+              "type": "object"
+            },
+            {
+              "id": "phone",
+              "name": "phone",
+              "value": "={{ $('Extract Data').item.json.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "message",
+              "name": "message",
+              "value": "={{ $('Extract Data').item.json.message }}",
+              "type": "string"
+            },
+            {
+              "id": "original_message",
+              "name": "original_message",
+              "value": "={{ $('Extract Data').item.json.original_message }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "merge-data",
+      "name": "Merge Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [1340, 300]
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "operation": "create",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are an AI assistant for a barber shop. Analyze customer messages and extract intent.\n\nReturn ONLY valid JSON in this exact format:\n{\n  \"intent\": \"book|check_availability|cancel|reschedule|help|chat\",\n  \"date\": \"YYYY-MM-DD or null\",\n  \"time\": \"HH:MM or null\",\n  \"service\": \"haircut|beard|both or null\",\n  \"confidence\": 0.95,\n  \"extracted_info\": \"brief summary\"\n}\n\nCurrent date: {{ $now.toFormat('yyyy-MM-dd') }}\nBusiness hours: Monday-Saturday 9:00-18:00 (Closed Sunday)\nTime slots: 30-minute intervals\n\nExamples:\n\"book me friday 3pm\" → {\"intent\":\"book\",\"date\":\"2024-02-19\",\"time\":\"15:00\",\"service\":\"haircut\",\"confidence\":0.95,\"extracted_info\":\"wants friday 3pm booking\"}\n\"u free tomorrow?\" → {\"intent\":\"check_availability\",\"date\":\"2024-02-17\",\"time\":null,\"service\":null,\"confidence\":0.9,\"extracted_info\":\"checking tomorrow availability\"}\n\"need to cancel\" → {\"intent\":\"cancel\",\"date\":null,\"time\":null,\"service\":null,\"confidence\":0.95,\"extracted_info\":\"wants to cancel appointment\"}"
+            },
+            {
+              "role": "user",
+              "content": "={{ $json.message }}"
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "id": "ai-intent",
+      "name": "AI Intent Detection",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.3,
+      "position": [1560, 300],
+      "credentials": {
+        "openAiApi": {
+          "id": "2",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "// Parse AI response and merge with customer data\nconst aiResponse = $input.item.json.choices[0].message.content;\nconst parsed = JSON.parse(aiResponse);\n\nconst customerData = $('Merge Data').item.json;\n\nreturn {\n  ...customerData,\n  intent: parsed.intent,\n  date: parsed.date,\n  time: parsed.time,\n  service: parsed.service || 'haircut',\n  confidence: parsed.confidence,\n  extracted_info: parsed.extracted_info\n};"
+      },
+      "id": "parse-intent",
+      "name": "Parse AI Intent",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1780, 300]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": ""
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "book",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "book"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": ""
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "check_availability",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "availability"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": ""
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "cancel",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "cancel"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": ""
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "help",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "help"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "switch-intent",
+      "name": "Switch Intent",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [2000, 300]
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "table": "appointments",
+        "filterType": "manual",
+        "filters": {
+          "conditions": [
+            {
+              "column": "date",
+              "condition": "equals",
+              "value": "={{ $json.date }}"
+            },
+            {
+              "column": "time_slot",
+              "condition": "equals",
+              "value": "={{ $json.time }}"
+            },
+            {
+              "column": "status",
+              "condition": "equals",
+              "value": "confirmed"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "check-availability",
+      "name": "Check Slot Availability",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [2220, 180],
+      "credentials": {
+        "supabaseApi": {
+          "id": "1",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": ""
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.length }}",
+              "rightValue": "0",
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "slot-available",
+      "name": "Slot Available?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [2440, 180]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "appointments",
+        "dataMode": "defineBelow",
+        "columnsUi": {
+          "columnValues": [
+            {
+              "column": "customer_id",
+              "value": "={{ $('Parse AI Intent').item.json.customer.id }}"
+            },
+            {
+              "column": "date",
+              "value": "={{ $('Parse AI Intent').item.json.date }}"
+            },
+            {
+              "column": "time_slot",
+              "value": "={{ $('Parse AI Intent').item.json.time }}"
+            },
+            {
+              "column": "service",
+              "value": "={{ $('Parse AI Intent').item.json.service }}"
+            },
+            {
+              "column": "status",
+              "value": "confirmed"
+            },
+            {
+              "column": "created_at",
+              "value": "={{ $now }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "create-booking",
+      "name": "Create Booking",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [2660, 80],
+      "credentials": {
+        "supabaseApi": {
+          "id": "1",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "action",
+              "name": "action",
+              "value": "booking_created",
+              "type": "string"
+            },
+            {
+              "id": "success",
+              "name": "success",
+              "value": "true",
+              "type": "boolean"
+            },
+            {
+              "id": "booking",
+              "name": "booking",
+              "value": "={{ $json }}",
+              "type": "object"
+            },
+            {
+              "id": "customer",
+              "name": "customer",
+              "value": "={{ $('Parse AI Intent').item.json.customer }}",
+              "type": "object"
+            },
+            {
+              "id": "phone",
+              "name": "phone",
+              "value": "={{ $('Parse AI Intent').item.json.phone }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "booking-success",
+      "name": "Booking Success Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [2880, 80]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "action",
+              "name": "action",
+              "value": "slot_unavailable",
+              "type": "string"
+            },
+            {
+              "id": "success",
+              "name": "success",
+              "value": "false",
+              "type": "boolean"
+            },
+            {
+              "id": "requested_date",
+              "name": "requested_date",
+              "value": "={{ $('Parse AI Intent').item.json.date }}",
+              "type": "string"
+            },
+            {
+              "id": "requested_time",
+              "name": "requested_time",
+              "value": "={{ $('Parse AI Intent').item.json.time }}",
+              "type": "string"
+            },
+            {
+              "id": "customer",
+              "name": "customer",
+              "value": "={{ $('Parse AI Intent').item.json.customer }}",
+              "type": "object"
+            },
+            {
+              "id": "phone",
+              "name": "phone",
+              "value": "={{ $('Parse AI Intent').item.json.phone }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "slot-taken",
+      "name": "Slot Taken Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [2660, 280]
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "table": "appointments",
+        "filterType": "manual",
+        "filters": {
+          "conditions": [
+            {
+              "column": "date",
+              "condition": "equals",
+              "value": "={{ $json.date || $now.toFormat('yyyy-MM-dd') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-day-bookings",
+      "name": "Get Day Bookings",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [2220, 400],
+      "credentials": {
+        "supabaseApi": {
+          "id": "1",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "// Generate available time slots\nconst bookedSlots = $input.item.json.map(booking => booking.time_slot);\n\n// Business hours: 9:00 - 18:00 (30min slots)\nconst allSlots = [];\nfor (let hour = 9; hour < 18; hour++) {\n  allSlots.push(`${hour.toString().padStart(2, '0')}:00`);\n  allSlots.push(`${hour.toString().padStart(2, '0')}:30`);\n}\n\nconst availableSlots = allSlots.filter(slot => !bookedSlots.includes(slot));\n\nconst requestedDate = $('Parse AI Intent').item.json.date || new Date().toISOString().split('T')[0];\n\nreturn {\n  action: 'availability_check',\n  date: requestedDate,\n  available_slots: availableSlots,\n  total_available: availableSlots.length,\n  phone: $('Parse AI Intent').item.json.phone,\n  customer: $('Parse AI Intent').item.json.customer\n};"
+      },
+      "id": "calculate-availability",
+      "name": "Calculate Availability",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2440, 400]
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "table": "appointments",
+        "filterType": "manual",
+        "filters": {
+          "conditions": [
+            {
+              "column": "customer_id",
+              "condition": "equals",
+              "value": "={{ $json.customer.id }}"
+            },
+            {
+              "column": "status",
+              "condition": "equals",
+              "value": "confirmed"
+            }
+          ]
+        },
+        "sortBy": "date, time_slot",
+        "limit": 1,
+        "options": {}
+      },
+      "id": "find-booking",
+      "name": "Find Active Booking",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [2220, 620],
+      "credentials": {
+        "supabaseApi": {
+          "id": "1",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": ""
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.length }}",
+              "rightValue": "0",
+              "operator": {
+                "type": "number",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "has-booking",
+      "name": "Has Booking?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [2440, 620]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "table": "appointments",
+        "filterType": "manual",
+        "matchingColumns": "id",
+        "id": "={{ $json[0].id }}",
+        "columnsUi": {
+          "columnValues": [
+            {
+              "column": "status",
+              "value": "cancelled"
+            },
+            {
+              "column": "cancelled_at",
+              "value": "={{ $now }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cancel-booking",
+      "name": "Cancel Booking",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [2660, 540],
+      "credentials": {
+        "supabaseApi": {
+          "id": "1",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "action",
+              "name": "action",
+              "value": "booking_cancelled",
+              "type": "string"
+            },
+            {
+              "id": "success",
+              "name": "success",
+              "value": "true",
+              "type": "boolean"
+            },
+            {
+              "id": "cancelled_booking",
+              "name": "cancelled_booking",
+              "value": "={{ $('Find Active Booking').item.json[0] }}",
+              "type": "object"
+            },
+            {
+              "id": "phone",
+              "name": "phone",
+              "value": "={{ $('Parse AI Intent').item.json.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "customer",
+              "name": "customer",
+              "value": "={{ $('Parse AI Intent').item.json.customer }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cancel-success",
+      "name": "Cancel Success Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [2880, 540]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "action",
+              "name": "action",
+              "value": "no_booking_found",
+              "type": "string"
+            },
+            {
+              "id": "success",
+              "name": "success",
+              "value": "false",
+              "type": "boolean"
+            },
+            {
+              "id": "phone",
+              "name": "phone",
+              "value": "={{ $('Parse AI Intent').item.json.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "customer",
+              "name": "customer",
+              "value": "={{ $('Parse AI Intent').item.json.customer }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "no-booking",
+      "name": "No Booking Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [2660, 720]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "action",
+              "name": "action",
+              "value": "help_info",
+              "type": "string"
+            },
+            {
+              "id": "info",
+              "name": "info",
+              "value": "=📍 Location: [Your Address Here]\n⏰ Hours: Mon-Sat 9am-6pm (Closed Sunday)\n💈 Services:\n  • Haircut - £15\n  • Beard Trim - £10\n  • Haircut + Beard - £22\n\n💬 Commands:\n• \"Book [day] [time]\" - Make appointment\n• \"Available [day]\" - Check free slots\n• \"Cancel\" - Cancel booking\n• \"Help\" - Show this info",
+              "type": "string"
+            },
+            {
+              "id": "phone",
+              "name": "phone",
+              "value": "={{ $json.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "customer",
+              "name": "customer",
+              "value": "={{ $json.customer }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "help-info",
+      "name": "Help Info",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [2220, 840]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "action",
+              "name": "action",
+              "value": "casual_chat",
+              "type": "string"
+            },
+            {
+              "id": "message",
+              "name": "user_message",
+              "value": "={{ $json.original_message }}",
+              "type": "string"
+            },
+            {
+              "id": "phone",
+              "name": "phone",
+              "value": "={{ $json.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "customer",
+              "name": "customer",
+              "value": "={{ $json.customer }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "chat-data",
+      "name": "Chat Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [2220, 1060]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "id": "merge-results",
+      "name": "Merge All Results",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [3100, 480]
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "operation": "create",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are a friendly barber shop assistant on WhatsApp. Generate natural, casual responses.\n\nContext:\n- Action: {{ $json.action }}\n- Customer name: {{ $json.customer.name || 'mate' }}\n\nGuidelines:\n- Keep it casual and friendly\n- Use 1-2 emojis MAX\n- Be brief (1-3 sentences)\n- British English\n\nExamples by action:\n\nbooking_created:\n\"✅ Sorted! See you {{ $json.booking.date }} at {{ $json.booking.time_slot }}. We'll send a reminder the day before.\"\n\nslot_unavailable:\n\"That time's gone mate. Got 2:30pm or 4pm free on {{ $json.requested_date }}?\"\n\navailability_check:\n\"Free slots for {{ $json.date }}:\n{{ $json.available_slots.slice(0,5).join(', ') }}\n\nReply 'BOOK [time]' to book 👍\"\n\nbooking_cancelled:\n\"No worries, cancelled your {{ $json.cancelled_booking.date }} appointment. Book anytime!\"\n\nno_booking_found:\n\"Can't find any upcoming bookings for you mate. Want to book one?\"\n\nhelp_info:\nJust return the info text as-is.\n\ncasual_chat:\nGenerate a friendly 1-2 sentence response to their message."
+            },
+            {
+              "role": "user",
+              "content": "={{ JSON.stringify($json) }}"
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "id": "generate-response",
+      "name": "Generate AI Response",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.3,
+      "position": [3320, 480],
+      "credentials": {
+        "openAiApi": {
+          "id": "2",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "// Extract the AI response text\nconst response = $input.item.json.choices[0].message.content;\nconst data = $input.item.json;\n\nreturn {\n  response_text: response,\n  phone: data.phone,\n  action: data.action,\n  customer_id: data.customer?.id\n};"
+      },
+      "id": "extract-response",
+      "name": "Extract Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [3540, 480]
+    },
+    {
+      "parameters": {
+        "authentication": "headerAuth",
+        "method": "POST",
+        "url": "https://api.twilio.com/2010-04-01/Accounts/{{ $credentials.accountSid }}/Messages.json",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "From",
+              "value": "whatsapp:+14155238886"
+            },
+            {
+              "name": "To",
+              "value": "=whatsapp:+{{ $json.phone }}"
+            },
+            {
+              "name": "Body",
+              "value": "={{ $json.response_text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "send-whatsapp",
+      "name": "Send WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [3760, 480],
+      "credentials": {
+        "twilioApi": {
+          "id": "3",
+          "name": "Twilio account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "message_logs",
+        "dataMode": "defineBelow",
+        "columnsUi": {
+          "columnValues": [
+            {
+              "column": "customer_id",
+              "value": "={{ $json.customer_id }}"
+            },
+            {
+              "column": "message_in",
+              "value": "={{ $('Extract Data').item.json.original_message }}"
+            },
+            {
+              "column": "intent",
+              "value": "={{ $('Parse AI Intent').item.json.intent }}"
+            },
+            {
+              "column": "action_taken",
+              "value": "={{ $json.action }}"
+            },
+            {
+              "column": "message_out",
+              "value": "={{ $json.response_text }}"
+            },
+            {
+              "column": "timestamp",
+              "value": "={{ $now }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "log-interaction",
+      "name": "Log Interaction",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [3980, 480],
+      "credentials": {
+        "supabaseApi": {
+          "id": "1",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=Message received",
+        "options": {}
+      },
+      "id": "webhook-response",
+      "name": "Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [4200, 480]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{"node": "Extract Data", "type": "main", "index": 0}]]
+    },
+    "Extract Data": {
+      "main": [[{"node": "Get Customer", "type": "main", "index": 0}]]
+    },
+    "Get Customer": {
+      "main": [[{"node": "Customer Exists?", "type": "main", "index": 0}]]
+    },
+    "Customer Exists?": {
+      "main": [
+        [{"node": "Merge Data", "type": "main", "index": 0}],
+        [{"node": "Create Customer", "type": "main", "index": 0}]
+      ]
+    },
+    "Create Customer": {
+      "main": [[{"node": "Merge Data", "type": "main", "index": 0}]]
+    },
+    "Merge Data": {
+      "main": [[{"node": "AI Intent Detection", "type": "main", "index": 0}]]
+    },
+    "AI Intent Detection": {
+      "main": [[{"node": "Parse AI Intent", "type": "main", "index": 0}]]
+    },
+    "Parse AI Intent": {
+      "main": [[{"node": "Switch Intent", "type": "main", "index": 0}]]
+    },
+    "Switch Intent": {
+      "main": [
+        [{"node": "Check Slot Availability", "type": "main", "index": 0}],
+        [{"node": "Get Day Bookings", "type": "main", "index": 0}],
+        [{"node": "Find Active Booking", "type": "main", "index": 0}],
+        [{"node": "Help Info", "type": "main", "index": 0}],
+        [{"node": "Chat Data", "type": "main", "index": 0}]
+      ]
+    },
+    "Check Slot Availability": {
+      "main": [[{"node": "Slot Available?", "type": "main", "index": 0}]]
+    },
+    "Slot Available?": {
+      "main": [
+        [{"node": "Create Booking", "type": "main", "index": 0}],
+        [{"node": "Slot Taken Data", "type": "main", "index": 0}]
+      ]
+    },
+    "Create Booking": {
+      "main": [[{"node": "Booking Success Data", "type": "main", "index": 0}]]
+    },
+    "Booking Success Data": {
+      "main": [[{"node": "Merge All Results", "type": "main", "index": 0}]]
+    },
+    "Slot Taken Data": {
+      "main": [[{"node": "Merge All Results", "type": "main", "index": 1}]]
+    },
+    "Get Day Bookings": {
+      "main": [[{"node": "Calculate Availability", "type": "main", "index": 0}]]
+    },
+    "Calculate Availability": {
+      "main": [[{"node": "Merge All Results", "type": "main", "index": 2}]]
+    },
+    "Find Active Booking": {
+      "main": [[{"node": "Has Booking?", "type": "main", "index": 0}]]
+    },
+    "Has Booking?": {
+      "main": [
+        [{"node": "Cancel Booking", "type": "main", "index": 0}],
+        [{"node": "No Booking Data", "type": "main", "index": 0}]
+      ]
+    },
+    "Cancel Booking": {
+      "main": [[{"node": "Cancel Success Data", "type": "main", "index": 0}]]
+    },
+    "Cancel Success Data": {
+      "main": [[{"node": "Merge All Results", "type": "main", "index": 3}]]
+    },
+    "No Booking Data": {
+      "main": [[{"node": "Merge All Results", "type": "main", "index": 4}]]
+    },
+    "Help Info": {
+      "main": [[{"node": "Merge All Results", "type": "main", "index": 5}]]
+    },
+    "Chat Data": {
+      "main": [[{"node": "Merge All Results", "type": "main", "index": 6}]]
+    },
+    "Merge All Results": {
+      "main": [[{"node": "Generate AI Response", "type": "main", "index": 0}]]
+    },
+    "Generate AI Response": {
+      "main": [[{"node": "Extract Response", "type": "main", "index": 0}]]
+    },
+    "Extract Response": {
+      "main": [[{"node": "Send WhatsApp", "type": "main", "index": 0}]]
+    },
+    "Send WhatsApp": {
+      "main": [[{"node": "Log Interaction", "type": "main", "index": 0}]]
+    },
+    "Log Interaction": {
+      "main": [[{"node": "Webhook Response", "type": "main", "index": 0}]]
+    }
+  },
+  "pinData": {}
+}

@@ -1,0 +1,399 @@
+Scripting with bash cheat sheet
+
+Shebang 
+* Interpreter = bash
+* Use shebang: #!/bin/bash or better: #!/usr/bin/env bash
+* This tells Linux to run the script with Bash
+* Script must be executable: chmod +x script.sh
+* Run with: ./script.sh
+* If you skip the shebang, script runs with whatever shell you�re currently in (can break things)
+Comments 
+Single-line comment
+* # comment ? Bash ignores anything after #
+Multi-line style comment
+* Use : ' ... '
+Running scripts from anywhere
+* $PATH = directories shell searches for commands
+* View PATH: echo $PATH
+* Any executable inside a PATH directory can be run from anywhere
+* Commands like ls, mv, cd, pwd work anywhere because they live in PATH directories; scripts only work if you�re inside their folder unless you put them in a PATH directory.
+* Common PATH directory for custom scripts: /usr/local/bin
+* Move script into PATH:
+o sudo mv greet.sh /usr/local/bin/greet
+* Make script executable:
+o sudo chmod +x /usr/local/bin/greet
+* Run script globally:
+o greet
+* Works in any directory (no ./ and no full path needed)
+
+Variables 
+* Variables store data: text, numbers, arrays
+* Create variable: name=value
+* Access variable: $name
+* String example: greeting="Hello, world" ? echo $greeting
+* Number example: count=42 ? echo $count
+* Array example: fruits= (�apple�, �banana�, �orange�) ? echo $fruits
+* Variable interpolation: name="Ahmed� greeting= �hello $name� ? echo greeting output= hello Ahmed
+* Variables must be defined before use
+* Make script executable: chmod +x var.sh
+* Run script:  ./var.sh
+Parameters 
+* Parameters = values given after the script name when running a script
+* Parameters are separated by spaces
+* $1 = first parameter
+* $2 = second parameter
+* $3 = third parameter
+* $@ = all parameters
+* Example script:
+#!/bin/bash
+echo "First: $1"
+echo "Second: $2"
+echo "Third: $3"
+echo "All: $@"
+Example run:  ./script.sh apple banana orange
+Output:
+First: apple
+Second: banana
+Third: orange
+All: apple banana orange
+Missing parameters are empty if not provided. Parameters make scripts dynamic and flexible. Script always reads parameters by position: 1st ? $1, 2nd ? $2, 3rd ? $3
+
+Arithmetic expansion 
+* Assign variables: num1=5, num2=6
+o Store values for calculations; no spaces around =
+o Case-sensitive: num1 � Num1
+* Arithmetic expansion: $((expression))
+o Tells Bash to calculate, not treat as text
+o Variables inside $(( )) don�t need $
+* Basic operations:
+o Addition: +
+o Subtraction: -
+o Multiplication: *
+o Division: / (integer only; decimals truncated)
+* Order of operations: use parentheses ()
+* Store results: result=$((num1 + num2))
+* Output results: echo "$result" or echo "Label: $result"
+* Use script parameters: $1, $2, $3
+o Example: sum=$(( $1 + $2 ))
+o Run script: ./script.sh 5 6
+* Combine variables and parameters:
+o total=$((num1 + $1))
+o echo "Total: $total"
+
+
+
+
+
+
+
+
+
+
+IF statements 
+
+if [ condition ]; then
+commands
+fi
+
+* Spaces are needed in the condition after each bracket
+
+-gt (Greater than)
+-lt (les/s than)
+-ge (Greater or equal)
+-le (Less or equal)
+eq (equal)
+-ne (Not equal)
+&& = AND 
+|| = OR 
+==  	compares string values if they are equal 
+!=  	checks to see if 2 strings are different 
+Elif
+* Stands for �else if�
+* Checks a new condition only if the previous if or elif was false
+* Used to handle multiple mutually exclusive conditions
+Example 
+if [ "$grade" -ge 71 ]; then
+    echo "First class"
+elif [ "$grade" -ge 40 ]; then
+    echo "Passed"
+fi
+Else
+* Runs commands if all previous if and elif conditions are false
+* Optional, used as a �catch-all�
+Example: 
+if [ "$grade" -ge 40 ]; then
+    echo "Passed"
+else
+    echo "Failed"
+fi
+
+Nested if
+* An if statement inside another if statement
+* Inner if runs only if the outer if is true
+* Used when second check depends on first
+Example:
+if [ "$grade" -ge 40 ]; then
+    echo "You passed"
+    if [ "$grade" -ge 71 ]; then
+        echo "You got a first"
+    fi
+else
+    echo "You failed"
+fi
+
+
+
+
+
+While loops 
+
+* A while loop repeats a block of code as long as a condition is true.
+* It keeps running until the condition becomes false.
+* Useful for iterating over arrays, counting numbers, or doing repeated tasks automatically.
+Syntax:
+
+while [ condition ]
+do
+    # commands to repeat
+done
+
+Example:
+count=1
+while [ $count -le 5 ]
+do
+    echo "Count: $count"
+    ((count++))
+done
+
+output:
+Count: 1
+Count: 2
+Count: 3
+Count: 4
+Count: 5
+
+Explanation:
+* count=1 ? starting number
+* [ $count -le 5 ] ? run while count � 5
+* echo ? print the current count
+* ((count++)) ? add 1 to count each loop
+* Stops automatically when count becomes 6
+
+Example 2: arrays 
+
+names=("Sara" "Ali" "Omar")
+index=0
+while [ $index -lt ${#names[@]} ]
+do
+    echo "Name: ${names[$index]}"
+    ((index++))
+Done
+
+Output:
+Name: Sara 
+Name: Ali 
+Name: Omar 
+* Create an array: names=("Sara" "Ali" "Omar") ? stores 3 names
+* Start at the first name: index=0
+* Loop while index is less than the total number of names (${#names[@]})
+* Print the name at the current index: echo ${names[$index]}
+* Increase index by 1: ((index++)) ? moves to the next name
+* Stops automatically when all names have been printed
+
+
+
+
+For loop 
+
+A for loop goes through a collection of values (whether it's a list, an array, or numbers you create), picks one value at a time, executes the command, then moves to the next until it's done.
+Examples of for loops  
+
+For names in Ali Mohamed and Abdullahi 
+
+Do echo �Name: $names�
+
+Done 
+
+Output:
+
+Name: Ali 
+Name: Mohamed 
+Name: Abdullahi 
+
+fruits=("Apple" "Orange" "Banana")  
+for food in "${fruits[@]}"  
+do echo "fruit: $food"   
+done
+
+output:
+fruit: Apple
+fruit: Orange
+fruit: Banana
+
+for (( i=1; i<=5; i++))  
+do echo "number: $i"  
+done
+
+output:
+number: 1
+number: 2
+number: 3
+number: 4
+number: 5
+
+for number in $(seq 1 3)  
+do echo "sequence: $number"  
+done
+output:
+sequence: 1
+sequence: 2
+sequence: 3
+
+
+
+
+
+
+
+
+
+Break and continue 
+
+Break and continue are used in for and while loops, this is used in a way so that the loops can stop or skip a process/step in a loop. This would be done by using IF statements inside of the loops. 
+
+Examples: of break and continue 
+
+car=1
+
+while true 
+do 
+echo "cars: $car"
+((car++))
+   	 if [ $car -eq 5 ]
+    	 then 
+       	 break
+ 	 fi  
+done 
+
+
+output:
+
+cars 1
+cars 2
+cars 3
+cars 4
+
+car=1
+
+while [ $car -le 5 ]
+
+do 
+
+if [ $car -eq 3 ]
+then 
+    ((car++))
+    continue 
+fi 
+echo "amount of cars: $car"
+((car++))
+
+done 
+
+output:
+
+amount of cars :1
+amount of cars :2
+amount of cars :4
+amount of cars :5
+
+
+
+
+
+
+Functions
+
+A function is like a call out to a set of commands that was assigned inside the function, you call it out and it runs.
+Example:
+
+hello_world () {
+
+echo �Hello world�
+
+}
+
+hello_world 
+
+output:
+Hello world 
+
+Example2
+greet_person () {
+
+local name= $1
+
+echo �Hello, $1�
+}
+greet_person Abdullahi 
+
+output:
+Hello, Abdullahi 
+Special Parameters 
+
+Positional parameters when used allow us to input things when we run scripts or create them, this is usually seen as $1or $2 these are positional parameters. 
+Special ones give us special ones give us special abilities when used in scripts, these are seen as:
+$@ - this lets us see all arguments in the script
+$0- this shows us the script name 
+$#- shows us how many arguments
+
+Example:
+
+arguments_1(){
+
+echo "number of arguments: $#"
+echo "script name: $0"
+echo "first argument: $1"
+echo "second argument: $2"
+echo "all arguments: $@"
+}
+
+arguments_1 "Abdullahi" "Mohamed" 
+
+output:
+number of arguments: 2 
+script name: /Users/Abdullahi/Desktop/Dev ops learning docs/bash /functions2.sh 
+first arguments: Abdullahi 
+second argument: Mohamed 
+all arguments: Abdullahi Mohamed
+User inputs 
+
+User inputs in bash come from parameters $1/$2 and the read command, they both allow users to make inputs. 
+
+Using the [read] command allows us to take a user input and then store it into a variable.
+Example:
+
+ greet_user(){
+
+echo "what is your name "
+
+read name 
+
+echo "Hello, $name"
+
+}
+
+greet_user 
+
+Terminal:
+What is your name 
+Abdullahi - user inputs name 
+Hello Abdullahi 
+
+
+
+Piping 
+
+ 
+
+
+

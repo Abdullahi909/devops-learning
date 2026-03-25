@@ -1,0 +1,12 @@
+Name: Abdullahi
+Age: 25
+City: London
+Name: Mohamed
+Age: 30
+City: Manchester
+Name: Ali
+Age: 22
+City: Birmingham
+Name: Sara
+Age: 28
+City: Liverpool
