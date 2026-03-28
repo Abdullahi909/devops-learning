@@ -20,4 +20,4 @@ Docker
 
 ## Find me
 
-[LinkedIn](https://www.linkedin.com/in/abdullahi-mohamed) — I post my progress regularly
+[LinkedIn](https://www.linkedin.com/in/abdullahi-mohamed-a056022a4/) — I post my progress regularly
