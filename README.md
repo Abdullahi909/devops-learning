@@ -14,7 +14,7 @@ Each folder is a module with notes, projects, and hands-on work.
 
 **Networking** — DNS, TCP/IP, subnetting, routing. Includes a project where I registered a domain, deployed NGINX on an EC2 instance, and configured DNS through Cloudflare to serve it live.
 
-**Docker** - images, containers, networking, multi-container setups. Includes a project connecting a Flask application to a MySQL container over a Docker bridge network.
+**Docker** — images, containers, networking, multi-container setups. Includes a project connecting a Flask application to a MySQL container over a Docker bridge network.
 
 ## Find me
 
