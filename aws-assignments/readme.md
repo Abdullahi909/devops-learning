@@ -86,9 +86,3 @@ This lab uses a public S3 website endpoint as its baseline. AWS documents that t
 
 For each project, I’m keeping an architecture diagram, console screenshots, configuration notes, validation results, security and cost decisions, and resource cleanup steps. Screenshots will exclude credentials and sensitive account details.
 
-## AWS study material
-
-- [AWS module cheat sheet](AWS_CHEAT_SHEET.md) — AWS concepts, architecture patterns, and troubleshooting notes
-- [ECS on EC2 vs. Fargate diagram (SVG)](ecs-ec2-vs-fargate-architecture.svg)
-- [ECS on EC2 vs. Fargate diagram (PNG)](ecs-ec2-vs-fargate-architecture.png)
-- [DevOps learning tracker](DEVOPS_LEARNING_TRACKER.md) — study areas and progress notes
