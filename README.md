@@ -16,6 +16,8 @@ Each folder is a module with notes, projects, and hands-on work.
 
 **Docker** — images, containers, networking, multi-container setups. Includes a project connecting a Flask application to a MySQL container over a Docker bridge network.
 
+**AWS** — Core services and architecture across IAM and EC2; VPC networking, including subnets, route tables, gateways, security groups, network ACLs, peering, VPC endpoints, PrivateLink and Transit Gateway; S3, EBS and EFS; CloudFront and Route 53; ECS and EKS; and Lambda with DynamoDB. Lessons also cover load balancing, Auto Scaling and CloudWatch alarms, including an event-driven S3-to-Lambda thumbnail workflow.
+
 **Terraform** — AWS infrastructure as code, including EC2, reusable modules, variables and outputs, remote state, and instance setup with user data and cloud-init. See [the Terraform work](Terraform/README.md).
 
 ## Find me
