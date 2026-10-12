@@ -1,0 +1,20 @@
+# Terraform working directory and downloaded providers
+.terraform/
+
+# Local state and backups
+*.tfstate
+*.tfstate.*
+
+# Variable values may contain personal or sensitive settings
+*.tfvars
+!*.tfvars.example
+
+# Crash logs and local CLI overrides
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc

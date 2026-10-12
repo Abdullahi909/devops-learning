@@ -16,6 +16,8 @@ Each folder is a module with notes, projects, and hands-on work.
 
 **Docker** — images, containers, networking, multi-container setups. Includes a project connecting a Flask application to a MySQL container over a Docker bridge network.
 
+**Terraform** — AWS infrastructure as code, including EC2, reusable modules, variables and outputs, remote state, and instance setup with user data and cloud-init. See [the Terraform work](Terraform/README.md).
+
 ## Find me
 
 [LinkedIn](https://www.linkedin.com/in/abdullahi-mohamed-a056022a4/) — I post my progress regularly
