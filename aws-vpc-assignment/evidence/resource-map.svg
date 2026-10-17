@@ -1,0 +1,141 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1220" role="img" aria-labelledby="title desc">
+<title id="title">Assignment -1 VPC resource map</title>
+<desc id="desc">AWS console inspired map of the supplied final-state evidence for Assignment -1 in eu-west-2. The public and private subnets, all three route tables, internet gateway, available NAT gateway with an EIP, active private route, and public EC2 are confirmed. Private EC2 evidence has not been supplied.</desc>
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#f59e0b"/></marker>
+  <marker id="arrowMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#e7a93c"/></marker>
+  <marker id="arrowGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#43d18a"/></marker>
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; fill: #e7edf3; }
+    .mono { font-family: SFMono-Regular, Menlo, Consolas, monospace; }
+    .muted { fill: #a6b5c3; }
+    .blue { fill: #36a9f5; }
+    .green { fill: #43d18a; }
+    .amber { fill: #ffc04b; }
+    .small { font-size: 17px; }
+    .tiny { font-size: 14px; }
+    .panel { fill: #111d28; stroke: #314355; stroke-width: 2; }
+    .confirmed { fill: #121f2a; stroke: #3a9bd6; stroke-width: 2; }
+    .verify { fill: #141d26; stroke: #d49b3d; stroke-width: 2; stroke-dasharray: 10 8; }
+  </style>
+</defs>
+<rect width="1920" height="1220" fill="#0b1117"/>
+<rect x="0" y="0" width="1920" height="10" fill="#f59e0b"/>
+<text x="72" y="62" font-size="16" font-weight="700" letter-spacing="2" class="amber">VPC RESOURCE MAP</text>
+<text x="72" y="112" font-size="38" font-weight="700">Assignment -1</text>
+<text x="72" y="148" font-size="19" class="muted">Assembled from the supplied AWS console screenshots · eu-west-2 · Europe (London)</text>
+<rect x="1470" y="47" width="350" height="66" rx="8" fill="#17232e" stroke="#344858"/>
+<circle cx="1500" cy="80" r="7" fill="#43d18a"/>
+<text x="1520" y="76" font-size="16" font-weight="650">Confirmed in screenshots</text>
+<text x="1520" y="99" font-size="14" class="muted">Current state shown in supplied evidence</text>
+<rect x="1470" y="126" width="350" height="66" rx="8" fill="#201d18" stroke="#a97a31" stroke-dasharray="7 5"/>
+<circle cx="1500" cy="159" r="7" fill="#ffc04b"/>
+<text x="1520" y="155" font-size="16" font-weight="650">Private EC2 evidence missing</text>
+<text x="1520" y="178" font-size="14" class="muted">Not shown in the supplied instance list</text>
+
+<!-- Internet and gateway -->
+<rect x="850" y="90" width="220" height="76" rx="10" class="panel"/>
+<path d="M890 132c-12 0-17-8-14-16 3-7 10-10 17-8 4-12 22-13 28-2 10-2 18 4 18 13 0 8-6 13-15 13z" fill="none" stroke="#36a9f5" stroke-width="3"/>
+<text x="954" y="125" font-size="18" font-weight="700">Internet</text>
+<text x="954" y="148" font-size="14" class="muted">0.0.0.0/0</text>
+<path d="M960 166 V223" fill="none" stroke="#43d18a" stroke-width="3" marker-end="url(#arrowGreen)"/>
+<rect x="810" y="230" width="300" height="96" rx="10" class="confirmed"/>
+<path d="M840 260h32v32h-32z M847 252h18v8h-18z M848 267h16 M848 276h16" fill="none" stroke="#36a9f5" stroke-width="2.5"/>
+<text x="890" y="265" font-size="20" font-weight="700">Internet Gateway</text>
+<text x="890" y="293" font-size="15" class="mono">igw-093980d53c1ebc1e5</text>
+<text x="890" y="315" font-size="13" class="green">Public route points to IGW</text>
+
+<!-- VPC boundary -->
+<rect x="60" y="290" width="1800" height="760" rx="18" fill="#0e1720" stroke="#36a9f5" stroke-width="3"/>
+<rect x="82" y="272" width="560" height="52" rx="8" fill="#0e1720"/>
+<text x="98" y="307" font-size="23" font-weight="700">VPC · Assignment -1</text>
+<text x="386" y="307" font-size="18" class="mono blue">10.0.0.0/16</text>
+<text x="1594" y="307" font-size="15" class="muted">Two Availability Zones</text>
+
+<!-- Availability zones -->
+<rect x="88" y="350" width="830" height="600" rx="14" fill="#0c151d" stroke="#34495a" stroke-width="2"/>
+<rect x="942" y="350" width="890" height="600" rx="14" fill="#0c151d" stroke="#34495a" stroke-width="2"/>
+<text x="112" y="384" font-size="17" font-weight="700" class="muted">eu-west-2a</text>
+<text x="966" y="384" font-size="17" font-weight="700" class="muted">eu-west-2b</text>
+
+<!-- Public subnet -->
+<rect x="110" y="405" width="785" height="545" rx="12" fill="#101b25" stroke="#277fb3" stroke-width="2"/>
+<text x="138" y="443" font-size="22" font-weight="700">public-subnet</text>
+<text x="138" y="470" font-size="17" class="mono blue">10.0.0.0/24</text>
+<rect x="706" y="420" width="160" height="34" rx="6" fill="#172937" stroke="#31526a"/>
+<text x="725" y="443" font-size="14" class="muted">Public subnet</text>
+
+<!-- Private subnet -->
+<rect x="964" y="405" width="790" height="545" rx="12" fill="#101b25" stroke="#277fb3" stroke-width="2"/>
+<text x="992" y="443" font-size="22" font-weight="700">private-subnet</text>
+<text x="992" y="470" font-size="17" class="mono blue">10.0.1.0/24</text>
+<rect x="1568" y="420" width="160" height="34" rx="6" fill="#172937" stroke="#31526a"/>
+<text x="1588" y="443" font-size="14" class="muted">Private subnet</text>
+
+<!-- Connectors behind resource cards -->
+<path d="M960 326 V374 H875 V505" fill="none" stroke="#43d18a" stroke-width="3" marker-end="url(#arrowGreen)"/>
+<path d="M990 590 H920 V900 H858" fill="none" stroke="#43d18a" stroke-width="3" marker-end="url(#arrowGreen)"/>
+
+<!-- Public route table -->
+<rect x="138" y="505" width="720" height="133" rx="9" class="confirmed"/>
+<text x="162" y="536" font-size="19" font-weight="700">Public route table</text>
+<text x="162" y="561" font-size="14" class="mono muted">rtb-0c9dfa7e1db13e0ce</text>
+<rect x="690" y="519" width="145" height="28" rx="14" fill="#123528"/>
+<text x="715" y="539" font-size="13" font-weight="700" class="green">ACTIVE</text>
+<text x="162" y="592" font-size="16" class="mono">0.0.0.0/0</text>
+<text x="294" y="592" font-size="16" class="muted">→</text>
+<text x="319" y="592" font-size="16" class="mono blue">IGW</text>
+<text x="162" y="618" font-size="14" class="mono muted">10.0.0.0/16 → local</text>
+<text x="490" y="618" font-size="13" class="muted">public subnet association shown</text>
+
+<!-- Public EC2 -->
+<rect x="138" y="678" width="720" height="155" rx="9" class="confirmed"/>
+<rect x="158" y="697" width="39" height="39" rx="7" fill="#17364a" stroke="#36a9f5"/>
+<path d="M168 708h19v17h-19z M172 703h11v5 M172 728v5 M183 728v5" fill="none" stroke="#36a9f5" stroke-width="2"/>
+<text x="212" y="711" font-size="20" font-weight="700">EC2 · assignment-1-1</text>
+<text x="212" y="738" font-size="14" class="mono muted">i-00f30ef4ddcacf702 · t2.micro · Running</text>
+<text x="162" y="773" font-size="15">Private IPv4 <tspan class="mono">10.0.0.54</tspan></text>
+<text x="162" y="801" font-size="15">Public IPv4 <tspan class="muted">masked in evidence</tspan></text>
+<text x="490" y="773" font-size="14" font-weight="650" class="green">SG: ec2-public-SG</text>
+<text x="490" y="797" font-size="13" class="muted">Saved inbound rules: TCP 80 + 22 from</text>
+<text x="490" y="817" font-size="13" class="muted">your public IP /32 (masked in evidence).</text>
+
+<!-- NAT -->
+<rect x="520" y="850" width="338" height="98" rx="9" class="confirmed"/>
+<path d="M542 877h25v25h-25z M548 872h13v5 M548 884h13 M548 892h13" fill="none" stroke="#36a9f5" stroke-width="2"/>
+<text x="580" y="882" font-size="16" font-weight="700">NAT Gateway · Available</text>
+<text x="580" y="905" font-size="13" class="mono muted">nat-0506784a30e92955d</text>
+<text x="580" y="929" font-size="13" class="green">Public · EIP attached · public subnet</text>
+
+<!-- Private route table -->
+<rect x="990" y="505" width="738" height="133" rx="9" class="confirmed"/>
+<text x="1014" y="536" font-size="19" font-weight="700">Private route table</text>
+<text x="1014" y="561" font-size="14" class="mono muted">rtb-0bb2e36c1c294a778</text>
+<rect x="1554" y="519" width="150" height="28" rx="14" fill="#123528"/>
+<text x="1572" y="539" font-size="12" font-weight="700" class="green">ACTIVE</text>
+<text x="1014" y="592" font-size="15" class="mono">0.0.0.0/0 → nat-0506784a30e92955d</text>
+<text x="1014" y="618" font-size="14" class="muted">private-subnet association shown · egress via NAT</text>
+
+<!-- Private EC2 -->
+<rect x="990" y="678" width="738" height="155" rx="9" class="verify"/>
+<rect x="1010" y="697" width="39" height="39" rx="7" fill="#302819" stroke="#ffc04b"/>
+<path d="M1020 708h19v17h-19z M1024 703h11v5 M1024 728v5 M1035 728v5" fill="none" stroke="#ffc04b" stroke-width="2"/>
+<text x="1064" y="711" font-size="20" font-weight="700">Private EC2</text>
+<text x="1064" y="738" font-size="14" class="amber">Not shown in the supplied EC2 instance list</text>
+<text x="1014" y="773" font-size="15" class="muted">Expected placement: private-subnet · no public IPv4</text>
+<text x="1014" y="801" font-size="14" class="muted">If launched, capture its private IP, subnet, and no public IPv4.</text>
+
+<!-- Main route table; the resource map and route-table list show no subnet association -->
+<rect x="110" y="960" width="1644" height="74" rx="9" class="confirmed"/>
+<text x="136" y="990" font-size="17" font-weight="700">Main route table</text>
+<text x="322" y="990" font-size="14" class="mono muted">rtb-0bbc9ec24a6178cef</text>
+<text x="136" y="1018" font-size="14" class="muted">Main table · no explicit subnet associations · local route only</text>
+<text x="1160" y="1004" font-size="14" class="green">3 route tables confirmed · public and private subnets each use their own table</text>
+
+<!-- Native-map note -->
+<rect x="88" y="1074" width="1744" height="92" rx="10" fill="#111b24" stroke="#344858"/>
+<text x="112" y="1108" font-size="17" font-weight="700">Evidence note</text>
+<text x="112" y="1138" font-size="15" class="muted">This console-inspired map is assembled from your supplied screenshots; the native AWS Resource Map screenshot confirms the current VPC topology.</text>
+<text x="112" y="1161" font-size="15" class="muted">The private EC2 is not visible in the current EC2 list. Its existence, placement, and public-IP setting still need confirmation.</text>
+<text x="72" y="1200" font-size="13" class="muted">Solid blue border = final state visible in supplied screenshots · Dashed amber border = no final-state instance evidence supplied</text>
+</svg>

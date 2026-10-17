@@ -22,9 +22,7 @@ I’m building three hands-on AWS projects through the AWS Management Console (C
 - Route public-subnet internet traffic through the Internet Gateway.
 - Route private-subnet outbound internet traffic through the NAT Gateway.
 - Launch a public EC2 instance with a public IP and a private EC2 instance without one.
-- Restrict public-instance SSH and HTTP access to my IP. Allow private-instance access only from internal sources, such as the public instance or a bastion host.
-
-**Bonus:** Add a bastion host and enable CloudWatch monitoring on the instances.
+- Restrict public-instance SSH and HTTP access to my IP. Allow private-instance access only from approved internal sources.
 
 ### Validate
 
@@ -46,8 +44,6 @@ I’m building three hands-on AWS projects through the AWS Management Console (C
 - Add an HTTP listener on port 80 that forwards requests to the target group.
 - Allow HTTP from the internet to the ALB Security Group. Allow HTTP to the EC2 Security Group only from the ALB Security Group.
 - Keep the EC2 instances inaccessible directly from the internet; use private subnets and no public IPs where possible.
-
-**Bonus:** Add a Route 53 Alias record, an HTTPS listener with ACM, or an Auto Scaling Group behind the ALB.
 
 ### Validate
 
@@ -86,3 +82,9 @@ This lab uses a public S3 website endpoint as its baseline. AWS documents that t
 
 For each project, I’m keeping an architecture diagram, console screenshots, configuration notes, validation results, security and cost decisions, and resource cleanup steps. Screenshots will exclude credentials and sensitive account details.
 
+## AWS study material
+
+- [AWS module cheat sheet](../AWS_CHEAT_SHEET.md) — AWS concepts, architecture patterns, and troubleshooting notes
+- [ECS on EC2 vs. Fargate diagram (SVG)](../ecs-ec2-vs-fargate-architecture.svg)
+- [ECS on EC2 vs. Fargate diagram (PNG)](../ecs-ec2-vs-fargate-architecture.png)
+- [DevOps learning tracker](../DEVOPS_LEARNING_TRACKER.md) — study areas and progress notes
