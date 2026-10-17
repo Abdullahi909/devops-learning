@@ -31,6 +31,8 @@ I’m building three hands-on AWS projects through the AWS Management Console (C
 - Verify that the private instance can make outbound connections through the NAT Gateway.
 - Capture the VPC, subnet, route-table, and Security Group settings.
 
+Project files and screenshots: [VPC and Networking evidence](aws-vpc-assignment/evidence/README.md).
+
 ## 2. Application Load Balancer
 
 **Objective:** Deploy two EC2 web servers behind an Application Load Balancer (ALB). The ALB handles incoming HTTP traffic, and the instances are not directly accessible from the internet.
