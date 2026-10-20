@@ -1,10 +1,10 @@
 # VPC & Networking evidence
 
-Screenshots are numbered in the order they tell the story: VPC and subnet setup, routing and security, then the final checks. The diagram is a style-matched summary of the project architecture. Public IP values and account identifiers are omitted.
+These screenshots document the AWS console build before cleanup. The EC2 screenshots show the single public instance that was launched. After capturing the evidence, I deleted the instances, custom Security Groups, and NAT Gateway.
 
-![AWS VPC architecture diagram for Assignment -1](aws-vpc-networking.png)
+![Actual AWS VPC resource map for Assignment -1](screenshots/15-final-vpc-resource-map.png)
 
-The latest screenshots confirm the VPC, both subnets, the public and private route tables, an available public NAT gateway with an EIP, the active private default route, and the public EC2 instance. The project diagram includes both EC2 instances; the supplied instance-list screenshot currently shows only the public instance.
+The AWS console resource map above shows the VPC, both subnets, route tables, Internet Gateway, and NAT Gateway as they appeared before cleanup. The numbered screenshots follow the build sequence and include the saved routing, Security Group, and public endpoint evidence.
 
 ## Screenshots
 
@@ -20,21 +20,14 @@ The latest screenshots confirm the VPC, both subnets, the public and private rou
 10. [Private route setup](screenshots/10-private-route-edit-form-unverified.png) — the route before its saved state was captured; screenshot 17 confirms the final active route.
 11. [Public security group setup](screenshots/11-public-security-group-create-form.png) — initial rules form; screenshot 20 shows the saved rules.
 12. [Public EC2 instance](screenshots/12-public-ec2-running.png) — running `t2.micro` in the public subnet.
-13. [Elastic IP list](screenshots/13-elastic-ip-list.png) — earlier address list; the newer NAT and resource-map screenshots show the current NAT gateway state.
+13. [Elastic IP list](screenshots/13-elastic-ip-list.png) — earlier address list; screenshots 15 and 16 show the NAT Gateway state during this build.
 14. [Public web endpoint](screenshots/14-public-web-endpoint.png) — browser displays the page served by EC2.
-15. [Final AWS VPC resource map](screenshots/15-final-vpc-resource-map.png) — both subnets, three route tables, the internet gateway, and NAT gateway with one EIP are visible.
+15. [Final AWS VPC resource map](screenshots/15-final-vpc-resource-map.png) — the actual AWS console resource map showing both subnets, three route tables, the Internet Gateway, and NAT Gateway.
 16. [NAT gateway details](screenshots/16-nat-gateway-available-eip.png) — NAT gateway is `Available` and `Public` in `public-subnet`; its public address is masked. The resource map shows one EIP attached.
 17. [Private route and subnet association](screenshots/17-private-route-active-and-associated.png) — `0.0.0.0/0` routes to the NAT gateway with `Active` status; `private-subnet` is explicitly associated with this table.
 18. [Route table inventory](screenshots/18-route-table-list-and-associations.png) — confirms the public, private, and main route tables. The first row is for a different VPC; the remaining three are for this assignment.
 19. [EC2 instance list](screenshots/19-ec2-instance-list.png) — shows the running public instance with both instance status checks passed. Public IPv4 is masked.
 20. [Saved public security group rules](screenshots/20-public-security-group-final-rules.png) — HTTP (TCP 80) and SSH (TCP 22) are restricted to the current public IP `/32`; the address is masked.
-
-## Private EC2 evidence
-
-Capture final-state screenshots that show the private instance and its security boundary:
-
-1. **EC2 → Instances:** show both assignment instances, their state, and their subnet. Then select the private instance and capture its details showing `private-subnet`, its private IPv4, and no public IPv4 address.
-2. **Private EC2 security group → Inbound rules:** show the saved rules and confirm access is limited to the intended internal source, such as the public instance's security group.
 
 ## Privacy
 
