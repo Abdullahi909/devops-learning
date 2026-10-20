@@ -2,9 +2,9 @@
 
 These screenshots document the AWS console build before cleanup. The EC2 screenshots show the single public instance that was launched. After capturing the evidence, I deleted the instances, custom Security Groups, and NAT Gateway.
 
-![Actual AWS VPC resource map for Assignment -1](screenshots/15-final-vpc-resource-map.png)
+![Illustrative VPC and Networking architecture for Assignment 1](aws-vpc-networking.png)
 
-The AWS console resource map above shows the VPC, both subnets, route tables, Internet Gateway, and NAT Gateway as they appeared before cleanup. The numbered screenshots follow the build sequence and include the saved routing, Security Group, and public endpoint evidence.
+This is an architecture illustration, not an AWS console screenshot. The actual AWS resource map from the build is screenshot 15 below. The numbered screenshots follow the build sequence and include the routing, Security Group, and public endpoint evidence.
 
 ## Screenshots
 
