@@ -54,7 +54,7 @@ Project files and screenshots: [VPC and Networking evidence](aws-vpc-assignment/
 - Confirm direct public access to the EC2 instances is blocked.
 - Capture the listener, target group, health check, and Security Group settings.
 
-Project files and screenshots: [Assignment 2 - Application Load Balancer evidence](aws-alb-assignment/evidence/README.md). The evidence follows the VPC project’s layout: an architecture illustration, numbered screenshots in build order, and a Privacy section. The first 11 screenshots document the ALB assignment; the remaining 22 retain the earlier Desktop collection as labelled context.
+Project files and screenshots: [Assignment 2 - Application Load Balancer evidence](aws-alb-assignment/evidence/README.md). The evidence follows the VPC project’s layout: an architecture illustration, numbered screenshots in build order, and a Privacy section. The first 11 screenshots document the ALB assignment; the remaining 19 document the earlier VPC build as labelled context.
 
 ## 3. S3 Static Website, CloudFront, and Route 53
 

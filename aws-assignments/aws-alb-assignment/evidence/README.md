@@ -4,7 +4,7 @@ These screenshots document the AWS console build and browser tests on **23 Octob
 
 ![Illustrative Application Load Balancer architecture for Assignment 2](aws-application-load-balancer.png)
 
-This is an architecture illustration, not an AWS console screenshot. The actual ALB network mapping is screenshot 4; registered targets and the `/` health check are screenshots 6 and 7. The illustration shows the HTTP traffic path and intended Security Group attachments. Screenshots 1–11 follow the ALB build and test sequence. Screenshots 12–33 retain the earlier Desktop collection as labelled context.
+This is an architecture illustration, not an AWS console screenshot. The actual ALB network mapping is screenshot 4; registered targets and the `/` health check are screenshots 6 and 7. The illustration shows the HTTP traffic path and intended Security Group attachments. Screenshots 1–11 follow the ALB build and test sequence. Screenshots 12–30 document the earlier VPC build as labelled context.
 
 ## Screenshots
 
@@ -38,9 +38,6 @@ This is an architecture illustration, not an AWS console screenshot. The actual 
 28. [Earlier VPC: private route and association](screenshots/28-vpc-private-route-active-and-associated.png) — Assignment 1 active default route to the NAT gateway and explicit private-subnet association.
 29. [Earlier VPC: route table inventory](screenshots/29-vpc-route-table-list-and-associations.png) — Assignment 1 public, private, and main route tables; the first row belongs to another VPC.
 30. [Earlier VPC: EC2 instance list](screenshots/30-vpc-ec2-instance-list.png) — Assignment 1 public instance with both instance status checks passed; these are instance checks, separate from ALB target health.
-31. [Other coursework: CI/CD definitions](screenshots/31-coursework-ci-cd-definition.png) — CoderCo course slide covering continuous integration, delivery, and deployment.
-32. [Other coursework: CI/CD pipeline](screenshots/32-coursework-ci-cd-pipeline.png) — CoderCo course slide showing the CI/CD pipeline.
-33. [Other project: Terraform WordPress test](screenshots/33-terraform-wordpress-browser-test.png) — `terraform project 1` WordPress page displaying the default `Hello world!` post.
 
 **Remaining evidence:** the user-data scripts, the saved HTTP port 80 listener forwarding to `assignment2-servers`, each instance’s attached Security Groups and failed direct-access test, and the active Internet Gateway route for `public-subnet-2`. The saved ALB and EC2 Security Group rules are already shown in screenshots 8 and 9.
 
