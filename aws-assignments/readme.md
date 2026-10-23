@@ -54,6 +54,8 @@ Project files and screenshots: [VPC and Networking evidence](aws-vpc-assignment/
 - Confirm direct public access to the EC2 instances is blocked.
 - Capture the listener, target group, health check, and Security Group settings.
 
+Project files and screenshots: [Assignment 2 - Application Load Balancer evidence](aws-alb-assignment/evidence/README.md). Includes both distinct server responses through the same ALB DNS name and the complete 24-image Desktop collection, with earlier VPC and other coursework screenshots labelled as context. The remaining ALB console and security evidence is listed at the end of the README.
+
 ## 3. S3 Static Website, CloudFront, and Route 53
 
 **Objective:** Host a static website in S3, deliver it through CloudFront, and connect a Route 53 domain if available.
