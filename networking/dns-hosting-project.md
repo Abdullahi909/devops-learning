@@ -52,6 +52,8 @@ Grabbed the public IPv4 address from the AWS console and pasted it into my brows
 
 Hit `abdullahimohamed.uk` in the browser and the NGINX welcome page loaded.
 
+![NGINX welcome page at abdullahimohamed.uk](images/nginx-welcome.jpg)
+
 
 ## What I learned
 
