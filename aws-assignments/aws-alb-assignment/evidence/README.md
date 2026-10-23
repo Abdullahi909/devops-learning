@@ -2,9 +2,9 @@
 
 This assignment demonstrates a common DevOps pattern: two EC2 web servers behind an Application Load Balancer (ALB), with the ALB acting as the public entry point.
 
-The screenshots captured on **23 October 2026** show the same ALB DNS name returning two different responses: **Response from Web Server 1** and **Response from Web Server 2**. They document the browser test. Console evidence for the infrastructure configuration, target health, and direct-access restrictions is still to be added.
+The screenshots captured on **23 October 2026** show two running EC2 instances in the same VPC, an active internet-facing ALB across two Availability Zones, a target group with **two healthy targets**, and saved ALB and EC2 Security Group rules. The browser tests show the same ALB DNS name returning **Response from Web Server 1** and **Response from Web Server 2**.
 
-All **24 screenshots found directly on the Desktop** are collected in this folder. Screenshots **01–02** show the ALB browser test; **03–21** document the earlier VPC assignment; **22–24** are other coursework and a Terraform browser test. The older screenshots are included for context and do not verify the ALB configuration.
+This folder contains **30 screenshots**: the original 24-image Desktop collection and six additional console captures. Screenshots **01–02 and 25–30** document Assignment 2; **03–21** document the earlier VPC assignment; **22–24** are other coursework and a Terraform browser test. The new captures confirm that Assignment 2 reuses the Assignment 1 VPC. The checklist at the end records the remaining evidence needed to verify every task.
 
 [Back to the AWS assignments](../../readme.md#2-application-load-balancer)
 
@@ -16,16 +16,31 @@ Deploy two EC2 instances in the same VPC, using different Availability Zones whe
 
 ```mermaid
 flowchart TD
-    Client[Internet client] -->|HTTP port 80| ALB
-    subgraph VPC[Same VPC]
-        ALB[Internet-facing Application Load Balancer<br/>Two public subnets in different Availability Zones]
-        ALB -->|HTTP listener forwards requests| TG[Target group<br/>HTTP port 80 / health check path: /]
-        TG --> EC2A[EC2 web server 1<br/>Distinct page content]
-        TG --> EC2B[EC2 web server 2<br/>Distinct page content]
+    Client[Internet client] -->|HTTP browser tests| ALB
+    subgraph VPC["VPC vpc-0231476c4420f60d1 / Assignment -1"]
+        ALB["assignment-2-ALB<br/>Active / Internet-facing / IPv4<br/>eu-west-2a and eu-west-2c"]
+        ALB -->|Associated target group| TG["assignment2-servers<br/>Instance targets / HTTP:80<br/>2 Healthy / 0 Unhealthy"]
+        TG -.-> EC2A["Web-server-1-assignment2<br/>public-subnet / eu-west-2a<br/>t3.micro / Public IPv4 assigned"]
+        TG -.-> EC2B["Web-server-2-assignment2<br/>public-subnet-2 / eu-west-2c<br/>t3.micro / Public IPv4 assigned"]
     end
 ```
 
-This diagram illustrates the **required assignment design**. The browser screenshots below do not establish the VPC, subnet, Availability Zone, listener, or Security Group configuration.
+The solid association and resource details are captured in screenshots 25–28. The instance Availability Zones are established by matching their subnet IDs in screenshots 25–26 to the ALB mappings in screenshot 27. Dashed links show the expected instance membership; the target group's **Targets** tab is still needed to match both registered target IDs to these instances. The listener configuration and health-check path are also still to be captured.
+
+## Recorded configuration
+
+| Resource | Captured configuration | Screenshot |
+| --- | --- | --- |
+| VPC | `vpc-0231476c4420f60d1`, named `Assignment -1`; reused from Assignment 1 | 25–27 |
+| Web server 1 | `Web-server-1-assignment2`, `i-01a84361324342609`, running `t3.micro`, Amazon Linux 2023, private IPv4 `10.0.0.242`; public IPv4 assigned | 25 |
+| Web server 1 subnet | `subnet-05dc09bd6f15ab842` / `public-subnet`, mapped to `eu-west-2a` | 25, 27 |
+| Web server 2 | `Web-server-2-assignment2`, `i-05e339f4e95e1cdf7`, running `t3.micro`, Amazon Linux 2023, private IPv4 `10.0.2.99`; public IPv4 assigned | 26 |
+| Web server 2 subnet | `subnet-01dc3bf21855dab04` / `public-subnet-2`, mapped to `eu-west-2c` | 26, 27 |
+| Load balancer | `assignment-2-ALB`, Application, `Active`, `Internet-facing`, IPv4, with the two subnet mappings above | 27 |
+| Target group | `assignment2-servers`, Instance targets, `HTTP:80`, `HTTP1`; associated with `assignment-2-ALB` | 28 |
+| Target health | `2` total targets, `2 Healthy`, `0 Unhealthy`, `0 Unused`, `0 Initial`, `0 Draining` | 28 |
+| ALB Security Group | `sg-06bf989c69cb15bbf`; inbound TCP `80` and `443` from both `0.0.0.0/0` and `::/0` | 29 |
+| EC2 Security Group | `assignment2-EC2-SG`, `sg-0e8fb847cae30c3f3`; inbound TCP `80` and `443` only from `sg-06bf989c69cb15bbf` | 30 |
 
 ## Evidence summary
 
@@ -33,20 +48,23 @@ This diagram illustrates the **required assignment design**. The browser screens
 | --- | --- | --- |
 | Visit the ALB DNS name over HTTP | Both browser screenshots show the same ALB hostname | Captured |
 | Receive different content from the two web servers | Screenshot 01 shows Web Server 1; screenshot 02 shows Web Server 2 | Captured |
-| Two EC2 instances in one VPC, preferably across two Availability Zones | EC2 instance and networking details | Console evidence needed |
+| Two EC2 instances in one VPC, preferably across two Availability Zones | Screenshots 25–26 show both running in the same VPC; their subnet IDs map to `eu-west-2a` and `eu-west-2c` in screenshot 27 | Captured |
 | Install the web servers using user data | User-data configuration for each instance | Console evidence needed |
-| ALB in two public subnets with an HTTP port 80 listener | ALB network mapping and listener configuration | Console evidence needed |
-| Both EC2 instances registered and healthy | Target group's registered targets and health status | Console evidence needed |
+| Internet-facing ALB in two Availability Zones | Screenshot 27 shows the active Application Load Balancer and both subnet mappings | Captured |
+| Both ALB subnets have public routing | Earlier screenshot 10 shows the Internet Gateway route for `public-subnet`; the route-table association and Internet Gateway route for `public-subnet-2` are still needed | Partly captured |
+| HTTP port 80 listener forwards to the target group | The browser tests and `HTTP:80` target group are captured; the listener's saved forwarding rule is still needed | Console evidence needed |
+| Target group has two healthy targets | Screenshot 28 shows `2 Healthy` out of `2` total targets | Captured |
+| Both named EC2 instances are the registered targets | The target group's **Targets** tab must show the two instance IDs | Console evidence needed |
 | Health check configured on `/` | Target group's health-check settings | Console evidence needed |
-| ALB Security Group allows HTTP from anywhere | ALB Security Group's saved inbound rules | Console evidence needed |
-| EC2 HTTP is allowed only from the ALB Security Group | EC2 Security Group's saved inbound rules and instance attachments | Console evidence needed |
-| Direct internet access to EC2 is blocked | Instance network details, all attached Security Groups, and a direct-access test where applicable | Evidence needed |
+| ALB Security Group allows HTTP from anywhere | Screenshot 29 shows HTTP from `0.0.0.0/0` and `::/0` | Captured |
+| EC2 Security Group allows HTTP only from the ALB Security Group | Screenshot 30 shows the saved source restriction | Rules captured; instance attachments needed |
+| Direct internet access to EC2 is blocked | Both instances have public IPv4 addresses; their attached Security Groups and a failed direct HTTP connection test are still needed | Evidence needed |
 
-Successful page responses do not establish that the targets are marked healthy or that direct access to the instances is blocked.
+Screenshot 28 confirms target health at the time of capture. The remaining direct-access check must establish that both instances use the restricted EC2 Security Group and that no additional attached group permits broader access.
 
 ## Screenshots
 
-The ALB tests appear first, followed by the VPC build sequence and the remaining Desktop screenshots. Every image has a numbered filename, a descriptive caption, and its original Desktop filename in the source index.
+The index covers all 30 screenshots. The Assignment 2 gallery follows the build sequence: instances, ALB, target group, Security Groups, then browser tests. Every image has a numbered filename, a descriptive caption, and its original filename in the source index.
 
 01. [ALB response — Web Server 1](screenshots/01-alb-response-web-server-1.png) — ALB.
 02. [ALB response — Web Server 2](screenshots/02-alb-response-web-server-2.png) — ALB.
@@ -72,28 +90,69 @@ The ALB tests appear first, followed by the VPC build sequence and the remaining
 22. [CI/CD definitions](screenshots/22-coursework-ci-cd-definition.png) — Coursework.
 23. [CI/CD pipeline overview](screenshots/23-coursework-ci-cd-pipeline.png) — Coursework.
 24. [Terraform WordPress browser test](screenshots/24-terraform-wordpress-browser-test.png) — Terraform.
+25. [EC2 web server 1 running](screenshots/25-ec2-web-server-1-running.png) — ALB.
+26. [EC2 web server 2 running](screenshots/26-ec2-web-server-2-running.png) — ALB.
+27. [Active ALB and two Availability Zones](screenshots/27-alb-active-and-two-availability-zones.png) — ALB.
+28. [Target group with two healthy targets](screenshots/28-target-group-two-healthy-targets.png) — ALB.
+29. [Saved ALB Security Group inbound rules](screenshots/29-alb-security-group-inbound-rules.png) — ALB.
+30. [Saved EC2 Security Group inbound rules](screenshots/30-ec2-security-group-alb-source-only.png) — ALB.
 
-### 01. ALB response — Web Server 1
+### Assignment 2 build and browser tests
+
+#### 25. EC2 web server 1 running
+
+Running t3.micro instance Web-server-1-assignment2 in the shared VPC and public-subnet; private IPv4 10.0.0.242. A public IPv4 address is assigned.
+
+![EC2 web server 1 running](screenshots/25-ec2-web-server-1-running.png)
+
+#### 26. EC2 web server 2 running
+
+Running t3.micro instance Web-server-2-assignment2 in the same VPC and public-subnet-2; private IPv4 10.0.2.99. A public IPv4 address is assigned.
+
+![EC2 web server 2 running](screenshots/26-ec2-web-server-2-running.png)
+
+#### 27. Active ALB and two Availability Zones
+
+assignment-2-ALB is Active, Application, Internet-facing, and IPv4, with subnet mappings in eu-west-2a and eu-west-2c. Its DNS name matches the browser tests.
+
+![Active ALB and two Availability Zones](screenshots/27-alb-active-and-two-availability-zones.png)
+
+#### 28. Target group with two healthy targets
+
+assignment2-servers uses Instance targets and HTTP:80, is associated with assignment-2-ALB, and shows 2 total targets, 2 Healthy, and 0 Unhealthy.
+
+![Target group with two healthy targets](screenshots/28-target-group-two-healthy-targets.png)
+
+#### 29. Saved ALB Security Group inbound rules
+
+sg-06bf989c69cb15bbf permits TCP 80 and 443 from 0.0.0.0/0 and ::/0. This capture shows inbound rules; no listener or certificate configuration is displayed.
+
+![Saved ALB Security Group inbound rules](screenshots/29-alb-security-group-inbound-rules.png)
+
+#### 30. Saved EC2 Security Group inbound rules
+
+assignment2-EC2-SG (sg-0e8fb847cae30c3f3) permits TCP 80 and 443 only from the ALB Security Group sg-06bf989c69cb15bbf. Instance Security Group attachments are not displayed.
+
+![Saved EC2 Security Group inbound rules](screenshots/30-ec2-security-group-alb-source-only.png)
+
+#### 01. ALB response — Web Server 1
 
 Response from Web Server 1 through the ALB DNS name, captured at 18:08:15 BST.
 
 ![ALB response — Web Server 1](screenshots/01-alb-response-web-server-1.png)
 
-
-### 02. ALB response — Web Server 2
+#### 02. ALB response — Web Server 2
 
 Response from Web Server 2 through the same ALB DNS name, captured at 18:08:21 BST.
 
 ![ALB response — Web Server 2](screenshots/02-alb-response-web-server-2.png)
 
-
 ### Earlier VPC assignment screenshots
 
-These screenshots document Assignment 1. Their original write-up is available in the [VPC evidence README](../../aws-vpc-assignment/evidence/README.md). Reuse of this VPC for Assignment 2 has not been established by the supplied ALB screenshots.
+These screenshots document Assignment 1. Their original write-up is available in the [VPC evidence README](../../aws-vpc-assignment/evidence/README.md). Screenshots 25–27 confirm that Assignment 2 reuses this VPC and the original `public-subnet`, with a second subnet in `eu-west-2c` added to the ALB mapping. These older captures record the earlier network state.
 
 <details>
 <summary>View screenshots 03–21: VPC, routing, gateways, and the earlier EC2 instance</summary>
-
 
 #### 03. VPC created
 
@@ -101,13 +160,11 @@ Assignment 1 VPC with CIDR 10.0.0.0/16.
 
 ![Assignment 1: VPC created](screenshots/03-vpc-created.png)
 
-
 #### 04. Public subnet
 
 Assignment 1 public subnet, 10.0.0.0/24 in eu-west-2a.
 
 ![Assignment 1: Public subnet](screenshots/04-vpc-public-subnet.png)
-
 
 #### 05. Private subnet
 
@@ -115,13 +172,11 @@ Assignment 1 private subnet, 10.0.1.0/24 in eu-west-2b.
 
 ![Assignment 1: Private subnet](screenshots/05-vpc-private-subnet.png)
 
-
 #### 06. Internet gateway setup
 
 Creation form for assignment-1-IGW.
 
 ![Assignment 1: Internet gateway setup](screenshots/06-vpc-internet-gateway-create-form.png)
-
 
 #### 07. Internet gateway attachment
 
@@ -129,13 +184,11 @@ Form selecting the Assignment 1 VPC for gateway attachment.
 
 ![Assignment 1: Internet gateway attachment](screenshots/07-vpc-internet-gateway-attach-form.png)
 
-
 #### 08. Unassociated Elastic IP
 
 Earlier Elastic IP detail with no association. The public address is masked in the existing repository copy.
 
 ![Assignment 1: Unassociated Elastic IP](screenshots/08-vpc-elastic-ip-unassociated.png)
-
 
 #### 09. NAT gateway setup
 
@@ -143,13 +196,11 @@ Assignment 1 public NAT gateway creation form.
 
 ![Assignment 1: NAT gateway setup](screenshots/09-vpc-nat-gateway-create-form.png)
 
-
 #### 10. Public route table
 
 Active 0.0.0.0/0 route to the Internet Gateway and public-subnet association.
 
 ![Assignment 1: Public route table](screenshots/10-vpc-public-route-table-active.png)
-
 
 #### 11. Private route table setup
 
@@ -157,13 +208,11 @@ Creation form for private-route-table.
 
 ![Assignment 1: Private route table setup](screenshots/11-vpc-private-route-table-create-form.png)
 
-
 #### 12. Private route setup
 
 Route-edit form before the saved state was captured; screenshot 19 shows the later active route.
 
 ![Assignment 1: Private route setup](screenshots/12-vpc-private-route-edit-form.png)
-
 
 #### 13. Public Security Group setup
 
@@ -171,13 +220,11 @@ Assignment 1 HTTP and SSH rules restricted to My IP. This is a form, and the sou
 
 ![Assignment 1: Public Security Group setup](screenshots/13-vpc-public-security-group-create-form.png)
 
-
 #### 14. Public EC2 instance
 
 The single running public EC2 instance from Assignment 1; its public address is masked.
 
 ![Assignment 1: Public EC2 instance](screenshots/14-vpc-public-ec2-running.png)
-
 
 #### 15. Elastic IP list
 
@@ -185,13 +232,11 @@ Assignment 1 Elastic IP inventory with the public address masked.
 
 ![Assignment 1: Elastic IP list](screenshots/15-vpc-elastic-ip-list.png)
 
-
 #### 16. Public web endpoint
 
 Assignment 1 browser test displays It works! through the public EC2 endpoint, whose address is masked.
 
 ![Assignment 1: Public web endpoint](screenshots/16-vpc-public-web-endpoint.png)
-
 
 #### 17. Final VPC resource map
 
@@ -199,13 +244,11 @@ Assignment 1 map with two subnets, three route tables, an Internet Gateway, and 
 
 ![Assignment 1: Final VPC resource map](screenshots/17-vpc-final-resource-map.png)
 
-
 #### 18. NAT gateway details
 
 Assignment 1 public NAT gateway in Available state; its public address is masked.
 
 ![Assignment 1: NAT gateway details](screenshots/18-vpc-nat-gateway-available.png)
-
 
 #### 19. Private route and subnet association
 
@@ -213,13 +256,11 @@ Active default route to the NAT gateway and explicit private-subnet association.
 
 ![Assignment 1: Private route and subnet association](screenshots/19-vpc-private-route-active-and-associated.png)
 
-
 #### 20. Route table inventory
 
 Assignment 1 public, private, and main route tables; the first row belongs to a different VPC.
 
 ![Assignment 1: Route table inventory](screenshots/20-vpc-route-table-list-and-associations.png)
-
 
 #### 21. EC2 instance list
 
@@ -227,16 +268,14 @@ The Assignment 1 public instance with both instance status checks passed. This d
 
 ![Assignment 1: EC2 instance list](screenshots/21-vpc-ec2-instance-list.png)
 
-
 </details>
 
 ### Other Desktop coursework screenshots
 
-These complete the requested Desktop collection. They document other learning work and do not establish any ALB requirement.
+These are the other learning screenshots from the requested Desktop collection.
 
 <details>
 <summary>View screenshots 22–24: CI/CD course slides and the Terraform WordPress test</summary>
-
 
 #### 22. CI/CD definitions
 
@@ -244,20 +283,17 @@ CoderCo course slide covering continuous integration, delivery, and deployment.
 
 ![CI/CD definitions](screenshots/22-coursework-ci-cd-definition.png)
 
-
 #### 23. CI/CD pipeline overview
 
 CoderCo course slide showing the CI/CD pipeline and its benefits.
 
 ![CI/CD pipeline overview](screenshots/23-coursework-ci-cd-pipeline.png)
 
-
 #### 24. Terraform WordPress browser test
 
 The terraform project 1 WordPress page displaying the default Hello world! post.
 
 ![Terraform WordPress browser test](screenshots/24-terraform-wordpress-browser-test.png)
-
 
 </details>
 
@@ -269,25 +305,28 @@ The recorded ALB hostname is:
 assignment-2-alb-1488629408.eu-west-2.elb.amazonaws.com
 ```
 
-Both screenshots use this hostname. The change in page content is consistent with requests reaching two different backend web servers. The hostname identifies the AWS Region as **Europe (London), `eu-west-2`**. These captures record the test at that time; they do not establish whether the endpoint is still running.
+Screenshots 01–02 use this hostname, which matches the ALB details in screenshot 27; DNS names are case-insensitive. The change in page content is consistent with requests reaching two different backend web servers, and screenshot 28 separately confirms two healthy targets. The AWS Region is **Europe (London), `eu-west-2`**. These captures record the deployment and tests on 23 October 2026.
 
 The test goal is to observe both distinct responses over repeated requests. AWS documents round robin as the default target-group routing algorithm; the configured algorithm for this build is not shown in the supplied screenshots. See [How Elastic Load Balancing works](https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html).
 
-## Required Security Group isolation
+## Saved Security Group rules and isolation
 
 | Security Group | Direction | Protocol / port | Source or destination |
 | --- | --- | --- | --- |
-| ALB Security Group | Inbound | HTTP / TCP 80 | Source: `0.0.0.0/0` |
-| ALB Security Group | Outbound | HTTP / TCP 80 for application traffic and health checks | Destination: EC2 Security Group |
-| EC2 Security Group | Inbound | HTTP / TCP 80 | Source: ALB Security Group only |
+| ALB Security Group `sg-06bf989c69cb15bbf` | Inbound | HTTP / TCP 80 | Sources: `0.0.0.0/0` and `::/0` |
+| ALB Security Group `sg-06bf989c69cb15bbf` | Inbound | HTTPS / TCP 443 | Sources: `0.0.0.0/0` and `::/0` |
+| EC2 Security Group `sg-0e8fb847cae30c3f3` | Inbound | HTTP / TCP 80 | Source: ALB Security Group `sg-06bf989c69cb15bbf` only |
+| EC2 Security Group `sg-0e8fb847cae30c3f3` | Inbound | HTTPS / TCP 443 | Source: ALB Security Group `sg-06bf989c69cb15bbf` only |
 
-These are the required rules, rather than a record of saved rules from this build. Capture the actual rules and their resource attachments before marking isolation as verified. Check every Security Group attached to each instance, because an additional group could allow broader access. If IPv6 is enabled, check its inbound rules too.
+These saved inbound rules are shown in screenshots 29–30. Each group reports one outbound permission entry, but its rule details are not displayed. The ALB details show an IPv4 load balancer even though its Security Group also contains IPv6 inbound rules. The screenshots show permission for port 443; the supplied evidence does not include an HTTPS listener or certificate.
+
+**Both EC2 instances have public IPv4 addresses.** This deployment therefore relies on Security Group isolation to meet the requirement that incoming application traffic goes through the ALB. The intended EC2 Security Group has no public HTTP or HTTPS source rule. Capture the **Security** tab of each instance to confirm its group attachments, check every attached group for broader access, and record a failed direct HTTP request to each instance's public address before marking this requirement verified.
 
 AWS recommends using the load balancer's Security Group as the source of the targets' inbound rule so the targets receive traffic exclusively from the load balancer. See [Security groups for your Application Load Balancer](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-update-security-groups.html).
 
 ## Source screenshots
 
-| No. | Original Desktop filename | Repository copy |
+| No. | Original screenshot filename | Repository copy |
 | --- | --- | --- |
 | 01 | `Screenshot 2026-10-23 at 18.08.15.png` | [01-alb-response-web-server-1.png](screenshots/01-alb-response-web-server-1.png) |
 | 02 | `Screenshot 2026-10-23 at 18.08.21.png` | [02-alb-response-web-server-2.png](screenshots/02-alb-response-web-server-2.png) |
@@ -313,12 +352,18 @@ AWS recommends using the load balancer's Security Group as the source of the tar
 | 22 | `Screenshot 2026-10-13 at 12.38.30.png` | [22-coursework-ci-cd-definition.png](screenshots/22-coursework-ci-cd-definition.png) |
 | 23 | `Screenshot 2026-10-13 at 12.41.08.png` | [23-coursework-ci-cd-pipeline.png](screenshots/23-coursework-ci-cd-pipeline.png) |
 | 24 | `Screenshot 2026-10-20 at 21.48.34.png` | [24-terraform-wordpress-browser-test.png](screenshots/24-terraform-wordpress-browser-test.png) |
+| 25 | `Screenshot 2026-10-23 at 18.32.53.png` | [25-ec2-web-server-1-running.png](screenshots/25-ec2-web-server-1-running.png) |
+| 26 | `Screenshot 2026-10-23 at 18.32.32.png` | [26-ec2-web-server-2-running.png](screenshots/26-ec2-web-server-2-running.png) |
+| 27 | `Screenshot 2026-10-23 at 18.33.27.png` | [27-alb-active-and-two-availability-zones.png](screenshots/27-alb-active-and-two-availability-zones.png) |
+| 28 | `Screenshot 2026-10-23 at 18.33.45.png` | [28-target-group-two-healthy-targets.png](screenshots/28-target-group-two-healthy-targets.png) |
+| 29 | `Screenshot 2026-10-23 at 18.34.27.png` | [29-alb-security-group-inbound-rules.png](screenshots/29-alb-security-group-inbound-rules.png) |
+| 30 | `Screenshot 2026-10-23 at 18.34.47.png` | [30-ec2-security-group-alb-source-only.png](screenshots/30-ec2-security-group-alb-source-only.png) |
 
 ## Privacy and screenshot integrity
 
-The original Desktop files are unchanged. For 18 of the earlier VPC screenshots, this collection reuses the corresponding **existing redacted copies** from the VPC evidence folder, preserving the account and public-address masks already used in the repository. The two ALB captures, screenshot 21, and the three other coursework screenshots are unchanged copies of the Desktop files. Screenshot 21 is a different EC2 details view from the existing VPC repository image, so its original capture is included; its AWS account label and EC2 public address remain visible. No screenshot has been recreated or generated.
+The original Desktop files and attached screenshots are unchanged. For 18 of the earlier VPC screenshots, this collection reuses the corresponding **existing redacted copies** from the VPC evidence folder, preserving the account and public-address masks already used in the repository. Screenshots 01–02, 21–24, and 25–30 are unchanged copies of the supplied files. Screenshot 21 and the new console captures retain visible AWS account identifiers and, on the instance detail pages, public IPv4 addresses. No screenshot has been recreated or generated.
 
-The ALB hostname remains visible so the two server responses can be matched to the same endpoint. All 24 images retain their source screenshot dimensions.
+The ALB hostname remains visible so the two server responses can be matched to the same endpoint and to the console details. All 30 images retain their source screenshot dimensions.
 
 ## Cleanup
 
@@ -326,14 +371,14 @@ Cleanup has not been evidenced in these captures. After completing the lab and s
 
 ## Evidence still needed — to fill in at the end
 
-To complete the evidence for all assignment tasks, capture:
+The latest captures complete the instance, VPC, ALB availability, target-health summary, and saved inbound-rule evidence. To verify the remaining tasks, capture:
 
-- [ ] Both EC2 instances, their running state, shared VPC, Availability Zones, network details, and attached Security Groups.
-- [ ] The user-data script on each instance, showing installation of the web server and its distinct page content.
-- [ ] The ALB details and network mapping, showing an internet-facing Application Load Balancer in two public subnets across two Availability Zones. Include subnet route-table evidence of internet-gateway routing.
-- [ ] The saved HTTP port 80 listener and its forwarding action to the target group.
-- [ ] The target group's registered instances, both showing `Healthy`, and the saved HTTP health-check path `/`.
-- [ ] The saved ALB and EC2 Security Group rules, showing the required source restrictions.
-- [ ] Evidence that the instances cannot be reached directly from the internet. For instances without public addresses, show their network details. If an instance has a public address, record a direct HTTP connection attempt failing alongside the Security Group evidence.
+- [ ] The **user-data script for each instance**, showing web-server installation and the distinct page content.
+- [ ] **ALB → Listeners and rules**, showing the saved `HTTP:80` listener forwarding to `assignment2-servers`.
+- [ ] **Target group → Targets**, showing both instance IDs (`i-01a84361324342609` and `i-05e339f4e95e1cdf7`) registered and `Healthy`.
+- [ ] **Target group → Health checks**, showing the saved HTTP health-check path `/`.
+- [ ] **EC2 → each instance → Security**, showing the attached Security Groups. Confirm both instances use `sg-0e8fb847cae30c3f3` and that no additional group permits direct public access.
+- [ ] A **failed direct HTTP connection to each instance's public IPv4 address**, captured while the same ALB endpoint remains reachable.
+- [ ] The **route-table association and active Internet Gateway route for `public-subnet-2`**, completing the evidence that both ALB subnets have public routing.
 
-Also record whether the lab resources have been cleaned up; the supplied screenshots do not show cleanup for Assignment 2.
+Also record whether the lab resources have been cleaned up; the supplied screenshots show the instances running and the ALB active at capture time, with no subsequent cleanup evidence.
