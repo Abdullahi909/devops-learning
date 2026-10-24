@@ -1,7 +1,9 @@
-# Docker learning
+# Docker Projects
 
+## [Flask and MySQL](hello_flask/README.md)
 
-## Contents
+I ran a Flask app and a MySQL database in separate containers and connected them over a Docker bridge network. The app queries the MySQL version and displays it in the browser.
 
-- `flask-mysql/` — Multi-container Flask + MySQL application connected over a Docker bridge network
-- `notes.md` — Docker learning notes covering images, containers, networking and Compose
+## [Flask, PostgreSQL and Nginx](docker%20project%3Aassignment/README.md)
+
+I put together a Docker project for a Flask app that stores messages in PostgreSQL, with Nginx as a reverse proxy. I wrote a two-stage Dockerfile and used environment variables for the database connection details, with a named volume for the database files.
