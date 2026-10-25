@@ -1,0 +1,64 @@
+Assignment 3 - Public DNS and HTTP verification
+Checked at 2026-10-25T12:37:42+00:00
+These are observed responses, not an AWS configuration export.
+
+Custom domain homepage
+$ /usr/bin/curl --silent --show-error --max-time 12 --head https://abdullahiaws.uk/
+Exit code: 0
+HTTP/2 200
+content-type: text/html
+content-length: 285
+server: AmazonS3
+x-cache: Hit from cloudfront
+via: 1.1 933ed3357b8f85661e4d84ebef8a63a8.cloudfront.net (CloudFront)
+age: 50624
+
+Explicit homepage path
+$ /usr/bin/curl --silent --show-error --max-time 12 --head https://abdullahiaws.uk/index.html
+Exit code: 0
+HTTP/2 200
+content-type: text/html
+content-length: 285
+server: AmazonS3
+x-cache: Hit from cloudfront
+via: 1.1 26247fc8fa119b662ed661fd387fed54.cloudfront.net (CloudFront)
+age: 50624
+
+Assignment error document
+$ /usr/bin/curl --silent --show-error --max-time 12 --head https://abdullahiaws.uk/error.html
+Exit code: 0
+HTTP/2 403
+content-type: application/xml
+server: AmazonS3
+x-cache: Error from cloudfront
+via: 1.1 dcf5a2deb202715e535979acb8e2a6a2.cloudfront.net (CloudFront)
+
+HTTP viewer policy
+$ /usr/bin/curl --silent --show-error --max-time 12 --head http://abdullahiaws.uk/
+Exit code: 0
+HTTP/1.1 403 Forbidden
+Server: CloudFront
+Content-Type: text/html
+Content-Length: 915
+X-Cache: Error from cloudfront
+Via: 1.1 26247fc8fa119b662ed661fd387fed54.cloudfront.net (CloudFront)
+
+Public DNS records
+$ dig +time=3 +tries=1 +noall +answer abdullahiaws.uk A abdullahiaws.uk AAAA abdullahiaws.uk NS
+Exit code: 0
+abdullahiaws.uk.	59	IN	A	99.86.91.45
+abdullahiaws.uk.	59	IN	A	99.86.91.94
+abdullahiaws.uk.	59	IN	A	99.86.91.19
+abdullahiaws.uk.	59	IN	A	99.86.91.85
+abdullahiaws.uk.	58	IN	AAAA	2600:9000:2117:f600:1d:3f:30c0:93a1
+abdullahiaws.uk.	58	IN	AAAA	2600:9000:2117:5c00:1d:3f:30c0:93a1
+abdullahiaws.uk.	58	IN	AAAA	2600:9000:2117:cc00:1d:3f:30c0:93a1
+abdullahiaws.uk.	58	IN	AAAA	2600:9000:2117:a800:1d:3f:30c0:93a1
+abdullahiaws.uk.	58	IN	AAAA	2600:9000:2117:f800:1d:3f:30c0:93a1
+abdullahiaws.uk.	58	IN	AAAA	2600:9000:2117:8600:1d:3f:30c0:93a1
+abdullahiaws.uk.	58	IN	AAAA	2600:9000:2117:7000:1d:3f:30c0:93a1
+abdullahiaws.uk.	58	IN	AAAA	2600:9000:2117:3400:1d:3f:30c0:93a1
+abdullahiaws.uk.	810	IN	NS	ns-1380.awsdns-44.org.
+abdullahiaws.uk.	810	IN	NS	ns-2023.awsdns-60.co.uk.
+abdullahiaws.uk.	810	IN	NS	ns-635.awsdns-15.net.
+abdullahiaws.uk.	810	IN	NS	ns-53.awsdns-06.com.

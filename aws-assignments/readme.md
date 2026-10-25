@@ -82,6 +82,8 @@ This lab uses a public S3 website endpoint as its baseline. AWS documents that t
 - Verify caching by changing the page, invalidating the cache, and checking the updated response.
 - Capture the origin, bucket access policy, HTTPS, DNS, and cache settings.
 
+Project files and screenshots: [Assignment 3 - S3 Static Website, CloudFront, and Route 53 evidence](aws-s3-assignment/evidence/README.md). The evidence follows the VPC and ALB projects' layout: an architecture illustration, numbered screenshots in build order, validation notes, and a Privacy section. The captured deployment uses a regular S3 bucket origin and an HTTPS-only viewer policy; differences from the website-endpoint brief and remaining evidence are documented in the project README.
+
 ## Project evidence
 
 For each project, I’m keeping an architecture diagram, console screenshots, configuration notes, validation results, security and cost decisions, and resource cleanup steps. Screenshots will exclude credentials and sensitive account details.
