@@ -28,4 +28,4 @@ This is an architecture illustration, not an AWS console screenshot. It follows 
 
 ## Privacy
 
-The supplied screenshots were copied without changing their contents, and the original files were left unchanged. The repository copies retain the visible AWS account and resource identifiers, public domain, and DNS record details. The architecture image is an illustration; the console evidence consists of the nine supplied screenshots. Its generation method, references, and prompt are recorded in [architecture-prompt.md](architecture-prompt.md).
+The supplied screenshots were copied without changing their contents, and the original files were left unchanged. The repository copies retain the visible AWS account and resource identifiers, public domain, and DNS record details. The architecture image is an illustration; the console evidence consists of the nine supplied screenshots.
