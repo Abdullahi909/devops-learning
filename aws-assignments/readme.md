@@ -90,5 +90,4 @@ For each project, I’m keeping an architecture diagram, console screenshots, co
 
 ## AWS study material
 
-- [AWS module cheat sheet](../AWS_CHEAT_SHEET.md) — AWS concepts, architecture patterns, and troubleshooting notes
-- [DevOps learning tracker](../DEVOPS_LEARNING_TRACKER.md) — study areas and progress notes
+- [AWS module cheat sheet](../dev%20ops%20learning%20notes/AWS_CHEAT_SHEET.md) — AWS concepts, architecture patterns, and troubleshooting notes
